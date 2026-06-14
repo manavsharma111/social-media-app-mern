@@ -1,12 +1,25 @@
-# React + Vite
+# 📱 Social Media Application (MERN Stack)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A fully functional, modern social media platform designed to connect users seamlessly. Built with MongoDB, Express.js, React, and Node.js (MERN), this application offers a premium user experience with real-time capabilities.
 
-Currently, two official plugins are available:
+## ✨ Key Features
+- **Real-time Chat & Notifications:** Powered by Socket.io for instant messaging and live updates.
+- **Media Sharing:** Upload images, videos, and short loops (reels) directly, integrated with Cloudinary.
+- **Interactive Feed:** Like, comment, and save posts dynamically.
+- **Modern UI/UX:** A stunning, responsive design with glassmorphism effects and smooth micro-animations built using Tailwind CSS.
+- **Secure Authentication:** User signup, login, and secure sessions.
+- **Explore & Search:** Discover new users, posts, and loops easily.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠️ Tech Stack
+- **Frontend:** React, Redux Toolkit, Tailwind CSS, Vite
+- **Backend:** Node.js, Express.js, Socket.io
+- **Database:** MongoDB (Mongoose)
+- **Cloud Storage:** Cloudinary
 
-## Expanding the ESLint configuration
+## 🚀 How to Run Locally
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Clone the repository
+2. Install dependencies for both backend and frontend:
+   ```bash
+   cd backend && npm install
+   cd ../frontend && npm install
