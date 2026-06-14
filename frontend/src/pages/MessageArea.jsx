@@ -132,7 +132,7 @@ useEffect(() => {
 }, [socket, selectedUser]);
 
   return (
-    <div className='w-full h-[100vh] bg-[#e0e5ec] relative animate-explode origin-center'>
+    <div className='w-full h-[100dvh] bg-[#e0e5ec] relative overflow-hidden animate-explode origin-center'>
       
       <div className=' w-full flex items-center gap-[15px] px-[20px] py-[10px] h-[60px] fixed top-0 z-[100] bg-white/40 backdrop-blur-md border-b border-white/50 shadow-[0_4px_30px_rgba(0,0,0,0.1)] '>
 
@@ -169,7 +169,7 @@ useEffect(() => {
 
       </div>
 
-      <div className='w-full h-[100dvh] pt-[80px] px-[15px] md:pl-[40px] md:pr-[60px] flex flex-col gap-[20px] overflow-y-auto overflow-x-hidden hide-scrollbar bg-[#e0e5ec] pb-[100px]'>
+      <div className='w-full h-full pt-[80px] px-[15px] md:pl-[40px] md:pr-[60px] flex flex-col gap-[20px] overflow-y-auto overflow-x-hidden hide-scrollbar bg-[#e0e5ec] pb-[100px]'>
 {(() => {
     const groups = {};
     (messages || []).forEach(msg => {
@@ -212,7 +212,7 @@ useEffect(() => {
 )}
       </div>
 
-<div className='w-full h-[80px] fixed bottom-0 flex justify-center items-center bg-white/40 backdrop-blur-md border-t border-white/50 z-[100]'>
+<div className='w-full h-[80px] absolute bottom-0 flex justify-center items-center bg-white/40 backdrop-blur-md border-t border-white/50 z-[100]'>
 <form className='w-[90%] max-w-[800px] h-[80%] rounded-full bg-[#e0e5ec] shadow-[inset_6px_6px_12px_#a3b1c6,inset_-6px_-6px_12px_#ffffff] flex items-center gap-[10px] px-[20px] relative' onSubmit={handleSendMessage}>
   {frontendFileUrl && (
     <div className='absolute top-[-120px] right-[10px] bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-2xl overflow-hidden p-[5px] flex items-center justify-center' style={{ width: '100px', height: '100px' }}>
