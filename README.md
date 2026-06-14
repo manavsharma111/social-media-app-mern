@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📱 SocialPulse - Full Stack Social Media Platform
+# 🐺 Wolf - Full Stack Social Media Platform
 
 ![MERN Stack](https://img.shields.io/badge/MERN-Stack-blue?style=for-the-badge&logo=mongodb)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
