@@ -32,8 +32,11 @@ app.get('/', (req, res) => {
 })
 
 
+// Connect to Database
+connectDb();
+
+// Start server locally (Vercel ignores this)
 server.listen(port , ()=>{
-    connectDb()
     console.log("server started")
 })
 
