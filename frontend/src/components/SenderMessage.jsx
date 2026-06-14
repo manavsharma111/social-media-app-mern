@@ -54,15 +54,17 @@ scroll.current.scrollIntoView({behavior:"smooth"})
       setShowReactions(false);
     };
 
+    const [showActions, setShowActions] = React.useState(false);
+
   return (
-    <div ref={scroll} className='w-full flex justify-end mb-[20px] group' onMouseLeave={() => { setShowMenu(false); setShowReactions(false); }}>
+    <div ref={scroll} className='w-full flex justify-end mb-[20px] group' onMouseLeave={() => { setShowMenu(false); setShowReactions(false); setShowActions(false); }}>
       <div className='flex items-end justify-end gap-[10px] max-w-full'>
         
     {/* Action Menus */}
     {!message.isDeletedForEveryone && (
-      <div className='flex items-center gap-2 mr-[10px] opacity-0 group-hover:opacity-100 transition-opacity'>
+      <div className={`flex items-center gap-2 mr-[10px] transition-opacity ${showActions ? 'opacity-100' : 'opacity-0 lg:group-hover:opacity-100'}`}>
         {/* Reaction Menu */}
-        <div className='relative opacity-0 group-hover:opacity-100 transition-opacity'>
+        <div className='relative'>
           <MdOutlineEmojiEmotions className='w-[20px] h-[20px] text-[#4a5568] cursor-pointer' onClick={() => {setShowReactions(!showReactions); setShowMenu(false);}} />
           {showReactions && (
             <div className='absolute bottom-[30px] right-0 z-[50] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-2xl'>
@@ -72,7 +74,7 @@ scroll.current.scrollIntoView({behavior:"smooth"})
         </div>
 
         {/* Menu Icon */}
-        <div className='relative opacity-0 group-hover:opacity-100 transition-opacity'>
+        <div className='relative'>
           <MdOutlineMoreVert className='w-[20px] h-[20px] text-[#4a5568] cursor-pointer' onClick={() => {setShowMenu(!showMenu); setShowReactions(false);}} />
           {showMenu && (
             <div className='absolute bottom-full mb-2 right-0 bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-xl p-[10px] z-[50] flex flex-col gap-2 min-w-[160px] text-right'>
@@ -85,7 +87,7 @@ scroll.current.scrollIntoView({behavior:"smooth"})
       </div>
     )}
 
-    <div className={`max-w-[85%] md:max-w-[70%] bg-[#e0e5ec] shadow-[inset_6px_6px_12px_#a3b1c6,inset_-6px_-6px_12px_#ffffff] rounded-2xl relative ${(!message.message && message.image) ? 'p-[10px]' : 'px-[20px] py-[15px]'}`}>
+    <div className={`max-w-[85%] md:max-w-[70%] bg-[#e0e5ec] shadow-[inset_6px_6px_12px_#a3b1c6,inset_-6px_-6px_12px_#ffffff] rounded-2xl relative cursor-pointer ${(!message.message && message.image) ? 'p-[10px]' : 'px-[20px] py-[15px]'}`} onClick={() => setShowActions(!showActions)}>
         {message?.image && (
           <div className={`${message.message ? 'mb-2' : ''} flex justify-center items-center`}>
             {message?.fileType?.includes('video') ? (

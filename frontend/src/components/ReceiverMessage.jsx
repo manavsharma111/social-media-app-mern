@@ -35,15 +35,17 @@ function ReceiverMessage({message}) {
       } catch (err) { console.log(err); }
     };
 
+    const [showActions, setShowActions] = useState(false)
+
   return (
-    <div ref={scroll} className='w-full flex justify-start mb-[20px] group' onMouseLeave={() => { setShowMenu(false); setShowReactions(false); }}>
+    <div ref={scroll} className='w-full flex justify-start mb-[20px] group' onMouseLeave={() => { setShowMenu(false); setShowReactions(false); setShowActions(false); }}>
       <div className='flex items-end gap-[10px] max-w-full'>
 
      <div className='w-[30px] h-[30px] flex-shrink-0 rounded-full shadow-[2px_2px_5px_#a3b1c6,-2px_-2px_5px_#ffffff] cursor-pointer overflow-hidden'>
         <img src={selectedUser.profileImage || dp} alt="" className='w-full h-full object-cover'/>
      </div>
 
-    <div className={`max-w-[85%] md:max-w-[70%] bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-2xl relative ${(!message.message && message.image) ? 'p-[10px]' : 'px-[20px] py-[15px]'}`}>
+    <div className={`max-w-[85%] md:max-w-[70%] bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-2xl relative cursor-pointer ${(!message.message && message.image) ? 'p-[10px]' : 'px-[20px] py-[15px]'}`} onClick={() => setShowActions(!showActions)}>
         {message?.image && (
           <div className={`${message.message ? 'mb-2' : ''} flex justify-center items-center`}>
             {message?.fileType?.includes('video') ? (
@@ -95,7 +97,7 @@ function ReceiverMessage({message}) {
     
     {/* Action Menus */}
     {!message.isDeletedForEveryone && (
-      <div className='flex items-center gap-2 ml-[10px] opacity-0 group-hover:opacity-100 transition-opacity'>
+      <div className={`flex items-center gap-2 ml-[10px] transition-opacity ${showActions ? 'opacity-100' : 'opacity-0 lg:group-hover:opacity-100'}`}>
         <div className='relative'>
           <MdOutlineEmojiEmotions className='w-[20px] h-[20px] text-[#4a5568] cursor-pointer' onClick={() => {setShowReactions(!showReactions); setShowMenu(false);}} />
           {showReactions && (
