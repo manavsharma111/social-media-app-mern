@@ -46,7 +46,8 @@ export const getAllPosts = async (req, res) => {
     try {
         const posts = await Post.find({})
             .populate("author", "name userName profileImage")
-            .populate("comments.author", "name userName profileImage").sort({ createdAt: -1 })
+            .populate("comments.author", "name userName profileImage")
+            .populate("comments.replies.author", "name userName profileImage").sort({ createdAt: -1 })
         return res.status(200).json(posts)
     } catch (error) {
         return res.status(500).json({ message: `getallpost error ${error}` })
@@ -125,8 +126,9 @@ export const comment = async (req, res) => {
             
             }
         await post.save()
-        await post.populate("author", "name userName profileImage"),
-            await post.populate("comments.author")
+        await post.populate("author", "name userName profileImage")
+        await post.populate("comments.author", "name userName profileImage")
+        await post.populate("comments.replies.author", "name userName profileImage")
         io.emit("commentedPost", {
             postId: post._id,
             comments: post.comments
@@ -192,5 +194,132 @@ export const editPost = async (req, res) => {
         return res.status(200).json(post);
     } catch (error) {
         return res.status(500).json({ message: `edit post error ${error}` })
+    }
+}
+
+export const likeComment = async (req, res) => {
+    try {
+        const { postId, commentId } = req.params;
+        const post = await Post.findById(postId);
+        if (!post) return res.status(404).json({ message: "Post not found" });
+
+        const comment = post.comments.id(commentId);
+        if (!comment) return res.status(404).json({ message: "Comment not found" });
+
+        const alreadyLiked = comment.likes.some(id => id.toString() === req.userId.toString());
+        if (alreadyLiked) {
+            comment.likes = comment.likes.filter(id => id.toString() !== req.userId.toString());
+        } else {
+            comment.likes.push(req.userId);
+        }
+
+        await post.save();
+        await post.populate("author", "name userName profileImage");
+        await post.populate("comments.author", "name userName profileImage");
+        await post.populate("comments.replies.author", "name userName profileImage");
+
+        io.emit("commentedPost", {
+            postId: post._id,
+            comments: post.comments
+        });
+
+        return res.status(200).json(post);
+    } catch (error) {
+        return res.status(500).json({ message: `likeComment error: ${error}` });
+    }
+}
+
+export const deleteComment = async (req, res) => {
+    try {
+        const { postId, commentId } = req.params;
+        const post = await Post.findById(postId);
+        if (!post) return res.status(404).json({ message: "Post not found" });
+
+        const comment = post.comments.id(commentId);
+        if (!comment) return res.status(404).json({ message: "Comment not found" });
+
+        if (comment.author.toString() !== req.userId && post.author.toString() !== req.userId) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        post.comments.pull(commentId);
+        await post.save();
+        await post.populate("author", "name userName profileImage");
+        await post.populate("comments.author", "name userName profileImage");
+        await post.populate("comments.replies.author", "name userName profileImage");
+
+        io.emit("commentedPost", {
+            postId: post._id,
+            comments: post.comments
+        });
+
+        return res.status(200).json(post);
+    } catch (error) {
+        return res.status(500).json({ message: `deleteComment error: ${error}` });
+    }
+}
+
+export const replyComment = async (req, res) => {
+    try {
+        const { postId, commentId } = req.params;
+        const { message } = req.body;
+        const post = await Post.findById(postId);
+        if (!post) return res.status(404).json({ message: "Post not found" });
+
+        const comment = post.comments.id(commentId);
+        if (!comment) return res.status(404).json({ message: "Comment not found" });
+
+        comment.replies.push({
+            author: req.userId,
+            message
+        });
+
+        await post.save();
+        await post.populate("author", "name userName profileImage");
+        await post.populate("comments.author", "name userName profileImage");
+        await post.populate("comments.replies.author", "name userName profileImage");
+
+        io.emit("commentedPost", {
+            postId: post._id,
+            comments: post.comments
+        });
+
+        return res.status(200).json(post);
+    } catch (error) {
+        return res.status(500).json({ message: `replyComment error: ${error}` });
+    }
+}
+
+export const deleteReply = async (req, res) => {
+    try {
+        const { postId, commentId, replyId } = req.params;
+        const post = await Post.findById(postId);
+        if (!post) return res.status(404).json({ message: "Post not found" });
+
+        const comment = post.comments.id(commentId);
+        if (!comment) return res.status(404).json({ message: "Comment not found" });
+
+        const reply = comment.replies.id(replyId);
+        if (!reply) return res.status(404).json({ message: "Reply not found" });
+
+        if (reply.author.toString() !== req.userId && post.author.toString() !== req.userId && comment.author.toString() !== req.userId) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        comment.replies.pull(replyId);
+        await post.save();
+        
+        await post.populate("author", "name userName profileImage");
+        await post.populate("comments.author", "name userName profileImage");
+        await post.populate("comments.replies.author", "name userName profileImage");
+
+        io.emit("commentedPost", {
+            postId: post._id,
+            comments: post.comments
+        });
+
+        return res.status(200).json(post);
+    } catch (error) {
+        return res.status(500).json({ message: `deleteReply error: ${error}` });
     }
 }

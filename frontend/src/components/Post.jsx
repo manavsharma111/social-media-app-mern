@@ -24,6 +24,8 @@ function Post({ post, isModal }) {
   const { socket } = useSelector(state => state.socket)
   const [showComment, setShowComment] = useState(false)
   const [message,setMessage]=useState("")
+  const [replyingTo, setReplyingTo] = useState(null)
+  const [replyMessage, setReplyMessage] = useState("")
   const [showDeleteMenu, setShowDeleteMenu] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editCaption, setEditCaption] = useState(post.caption || "")
@@ -75,9 +77,49 @@ function Post({ post, isModal }) {
 
       const updatedPosts=postData.map(p=>p._id==post._id?updatedPost:p)
       dispatch(setPostData(updatedPosts))
+      setMessage("")
     } catch (error) {
       console.log(error.response)
     }
+  }
+
+  const handleLikeComment = async (commentId) => {
+    try {
+      const result = await axios.get(`${serverUrl}/api/post/comment/like/${post._id}/${commentId}`, { withCredentials: true })
+      const updatedPost = result.data
+      const updatedPosts = postData.map(p => p._id == post._id ? updatedPost : p)
+      dispatch(setPostData(updatedPosts))
+    } catch (error) { console.log(error) }
+  }
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      const result = await axios.delete(`${serverUrl}/api/post/comment/delete/${post._id}/${commentId}`, { withCredentials: true })
+      const updatedPost = result.data
+      const updatedPosts = postData.map(p => p._id == post._id ? updatedPost : p)
+      dispatch(setPostData(updatedPosts))
+    } catch (error) { console.log(error) }
+  }
+
+  const handleReplyComment = async (commentId) => {
+    if(!replyMessage.trim()) return;
+    try {
+      const result = await axios.post(`${serverUrl}/api/post/comment/reply/${post._id}/${commentId}`, { message: replyMessage }, { withCredentials: true })
+      const updatedPost = result.data
+      const updatedPosts = postData.map(p => p._id == post._id ? updatedPost : p)
+      dispatch(setPostData(updatedPosts))
+      setReplyingTo(null)
+      setReplyMessage("")
+    } catch (error) { console.log(error) }
+  }
+
+  const handleDeleteReply = async (commentId, replyId) => {
+    try {
+      const result = await axios.delete(`${serverUrl}/api/post/comment/reply/delete/${post._id}/${commentId}/${replyId}`, { withCredentials: true })
+      const updatedPost = result.data
+      const updatedPosts = postData.map(p => p._id == post._id ? updatedPost : p)
+      dispatch(setPostData(updatedPosts))
+    } catch (error) { console.log(error) }
   }
 
   const handleSaved=async ()=>{
@@ -246,15 +288,55 @@ socket?.on("postEdited",(updatedData)=>{
             </div>
           </div>
 
-          <div className='w-full max-h-[250px] overflow-y-auto px-[20px] flex flex-col gap-[15px] hide-scrollbar'>
+          <div className='w-full max-h-[350px] overflow-y-auto px-[20px] flex flex-col gap-[15px] hide-scrollbar'>
             {post.comments?.map((com,index)=>(
-              <div key={index} className='w-full p-[15px] flex items-start gap-[15px] bg-[#e0e5ec] shadow-[4px_4px_8px_#a3b1c6,-4px_-4px_8px_#ffffff] rounded-2xl'>
-                 <div className='w-[35px] h-[35px] p-[2px] bg-[#e0e5ec] shadow-[inset_2px_2px_5px_#a3b1c6,inset_-2px_-2px_5px_#ffffff] rounded-full cursor-pointer overflow-hidden flex-shrink-0' onClick={() => navigate(`/profile/${com.author.userName}`)}>
-                    <img src={com.author.profileImage || dp} alt="" className='w-full h-full object-cover rounded-full' />
-                 </div>
-                 <div className='flex flex-col flex-1 mt-[2px]'>
-                    <div className='font-bold text-[14px] text-[#2d3748] cursor-pointer hover:underline' onClick={() => navigate(`/profile/${com.author.userName}`)}>{com.author.userName}</div>
-                    <div className='text-[#4a5568] text-[13px] mt-[2px]'>{com.message}</div>
+              <div key={index} className='w-full p-[15px] flex flex-col gap-[10px] bg-[#e0e5ec] shadow-[2px_2px_6px_#a3b1c6] rounded-2xl'>
+                 <div className='flex items-start gap-[15px]'>
+                    <div className='w-[35px] h-[35px] p-[2px] bg-[#e0e5ec] shadow-[inset_2px_2px_5px_#a3b1c6,inset_-2px_-2px_5px_#ffffff] rounded-full cursor-pointer overflow-hidden flex-shrink-0' onClick={() => navigate(`/profile/${com.author.userName}`)}>
+                        <img src={com.author.profileImage || dp} alt="" className='w-full h-full object-cover rounded-full' />
+                    </div>
+                    <div className='flex flex-col flex-1 mt-[2px]'>
+                        <div className='font-bold text-[14px] text-[#2d3748] cursor-pointer hover:underline' onClick={() => navigate(`/profile/${com.author.userName}`)}>{com.author.userName}</div>
+                        <div className='text-[#4a5568] text-[13px] mt-[2px]'>{com.message}</div>
+                        
+                        <div className='flex items-center gap-4 mt-2'>
+                          <div className='flex items-center gap-1 cursor-pointer text-[#4a5568] hover:text-[#2d3748]' onClick={() => handleLikeComment(com._id)}>
+                            {com.likes?.includes(userData._id) ? <GoHeartFill className='w-4 h-4 text-red-600'/> : <GoHeart className='w-4 h-4'/>}
+                            <span className='text-xs font-bold'>{com.likes?.length || 0}</span>
+                          </div>
+                          <div className='text-xs font-bold cursor-pointer text-[#4a5568] hover:text-[#2d3748]' onClick={() => setReplyingTo(replyingTo === com._id ? null : com._id)}>Reply</div>
+                          {(com.author._id === userData._id || post.author._id === userData._id) && (
+                            <div className='text-xs font-bold cursor-pointer text-red-500 hover:text-red-700' onClick={() => handleDeleteComment(com._id)}>Delete</div>
+                          )}
+                        </div>
+
+                        {replyingTo === com._id && (
+                          <div className='w-full flex items-center gap-2 mt-3 bg-white/40 p-1 rounded-full pl-3'>
+                            <input type='text' className='flex-1 bg-transparent text-sm outline-none text-[#2d3748]' placeholder={`Reply to ${com.author.userName}...`} autoFocus value={replyMessage} onChange={e => setReplyMessage(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleReplyComment(com._id)} />
+                            <button className='text-xs font-bold text-white bg-[#4a5568] rounded-full px-3 py-1' onClick={() => handleReplyComment(com._id)}>Send</button>
+                          </div>
+                        )}
+                        
+                        {/* Replies */}
+                        {com.replies?.length > 0 && (
+                          <div className='flex flex-col gap-3 mt-3 pl-3 pt-2 border-l-2 border-[#c8d0da]'>
+                            {com.replies.map(reply => (
+                              <div key={reply._id} className='flex items-start gap-2'>
+                                <div className='w-[25px] h-[25px] rounded-full overflow-hidden flex-shrink-0 cursor-pointer p-[1px] bg-[#e0e5ec] shadow-[inset_1px_1px_3px_#a3b1c6,inset_-1px_-1px_3px_#ffffff]' onClick={() => navigate(`/profile/${reply.author.userName}`)}>
+                                    <img src={reply.author.profileImage || dp} className='w-full h-full object-cover rounded-full' />
+                                </div>
+                                <div className='flex flex-col flex-1'>
+                                    <div className='font-bold text-[12px] text-[#2d3748] cursor-pointer hover:underline leading-tight' onClick={() => navigate(`/profile/${reply.author.userName}`)}>{reply.author.userName}</div>
+                                    <div className='text-[#4a5568] text-[12px] mt-[1px]'>{reply.message}</div>
+                                    {(reply.author._id === userData._id || post.author._id === userData._id || com.author._id === userData._id) && (
+                                      <div className='text-[10px] font-bold cursor-pointer text-red-500 hover:text-red-700 mt-1' onClick={() => handleDeleteReply(com._id, reply._id)}>Delete</div>
+                                    )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                    </div>
                  </div>
               </div>
             ))}
