@@ -138,9 +138,16 @@ const getAllMessages=async ()=>{
     console.log(error)
   }
 }
+
 useEffect(()=>{
-getAllMessages()
-},[])
+  if (!selectedUser) {
+    navigate('/messages')
+    return;
+  }
+  getAllMessages()
+},[selectedUser, navigate])
+
+if (!selectedUser) return null;
 
 useEffect(()=>{
 socket?.on("newMessage",(mess)=>{

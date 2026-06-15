@@ -35,8 +35,8 @@ function ForwardModal({ onClose, onForward }) {
     };
 
     return (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-            <div className="w-full max-w-md bg-[#e0e5ec] shadow-[10px_10px_20px_#a3b1c6,-10px_-10px_20px_#ffffff] rounded-3xl p-6 flex flex-col max-h-[80vh]">
+        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={onClose}>
+            <div className="w-full max-w-md bg-[#e0e5ec] shadow-2xl rounded-3xl p-6 flex flex-col max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-[#2d3748]">Forward To...</h2>
                     <div className="w-8 h-8 flex items-center justify-center rounded-full bg-[#e0e5ec] shadow-[4px_4px_8px_#a3b1c6,-4px_-4px_8px_#ffffff] cursor-pointer text-[#4a5568]" onClick={onClose}>
@@ -55,11 +55,11 @@ function ForwardModal({ onClose, onForward }) {
                     <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[#a3b1c6] w-6 h-6" />
                 </div>
 
-                <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-3 hide-scrollbar">
+                <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-4 hide-scrollbar">
                     {users.map(user => (
                         <div 
                             key={user._id} 
-                            className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all ${selectedUsers.includes(user._id) ? 'bg-[#d1d8e0] shadow-[inset_4px_4px_8px_#a3b1c6,inset_-4px_-4px_8px_#ffffff]' : 'bg-[#e0e5ec] shadow-[4px_4px_8px_#a3b1c6,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_5px_#a3b1c6,inset_-2px_-2px_5px_#ffffff]'}`}
+                            className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all m-1 ${selectedUsers.includes(user._id) ? 'bg-[#d1d8e0] shadow-[inset_4px_4px_8px_#a3b1c6,inset_-4px_-4px_8px_#ffffff]' : 'bg-[#e0e5ec] shadow-[4px_4px_8px_#a3b1c6,-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_5px_#a3b1c6,inset_-2px_-2px_5px_#ffffff]'}`}
                             onClick={() => toggleUser(user._id)}
                         >
                             <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
