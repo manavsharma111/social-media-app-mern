@@ -239,3 +239,104 @@ export const markMessagesAsRead = async (req, res) => {
         return res.status(500).json({ message: `mark as read error ${error}` });
     }
 }
+
+export const deleteMultipleMessages = async (req, res) => {
+    try {
+        const { messageIds, deleteType } = req.body;
+        const userId = req.userId;
+
+        if (!messageIds || !Array.isArray(messageIds) || messageIds.length === 0) {
+            return res.status(400).json({ message: "No messages selected" });
+        }
+
+        const messages = await Message.find({ _id: { $in: messageIds } });
+        const updatedMessages = [];
+
+        for (const message of messages) {
+            if (deleteType === "forEveryone") {
+                if (message.sender.toString() !== userId) continue;
+
+                message.message = "🚫 This message was deleted";
+                message.image = null;
+                message.fileType = null;
+                message.reaction = null;
+                message.isDeletedForEveryone = true;
+
+                await message.save();
+                updatedMessages.push(message);
+
+                const receiverSocketId = getSocketId(message.receiver);
+                if (receiverSocketId) {
+                    io.to(receiverSocketId).emit("messageEdited", message);
+                }
+            } else if (deleteType === "forMe") {
+                if (message.sender.toString() === userId || message.receiver.toString() === userId) {
+                    if (!message.deletedBy.includes(userId)) {
+                        message.deletedBy.push(userId);
+                        await message.save();
+                        updatedMessages.push({_id: message._id, deletedForMe: true});
+                    }
+                }
+            }
+        }
+
+        return res.status(200).json({ message: "Messages deleted", updatedMessages, deleteType });
+    } catch (error) {
+        return res.status(500).json({ message: `delete multiple messages error ${error}` });
+    }
+}
+
+export const forwardMessages = async (req, res) => {
+    try {
+        const senderId = req.userId;
+        const { messageIds, receiverIds } = req.body;
+
+        if (!messageIds || !receiverIds || !Array.isArray(messageIds) || !Array.isArray(receiverIds)) {
+             return res.status(400).json({ message: "Invalid data" });
+        }
+
+        const messagesToForward = await Message.find({ _id: { $in: messageIds } });
+        messagesToForward.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+        const forwardedMessages = [];
+
+        for (const receiverId of receiverIds) {
+            for (const originalMessage of messagesToForward) {
+                if(originalMessage.isDeletedForEveryone) continue;
+
+                const newMessage = await Message.create({
+                    sender: senderId,
+                    receiver: receiverId,
+                    message: originalMessage.message,
+                    image: originalMessage.image,
+                    fileType: originalMessage.fileType
+                });
+
+                let conversation = await Conversation.findOne({
+                    participants: { $all: [senderId, receiverId] }
+                });
+                
+                if (!conversation) {
+                    conversation = await Conversation.create({
+                        participants: [senderId, receiverId],
+                        messages: [newMessage._id]
+                    });
+                } else {
+                    conversation.messages.push(newMessage._id);
+                    await conversation.save();
+                }
+
+                const receiverSocketId = getSocketId(receiverId);
+                if (receiverSocketId) {
+                    io.to(receiverSocketId).emit("newMessage", newMessage);
+                }
+                
+                forwardedMessages.push(newMessage);
+            }
+        }
+
+        return res.status(200).json({ message: "Messages forwarded successfully", forwardedMessages });
+    } catch (error) {
+        return res.status(500).json({ message: `forward messages error ${error}` });
+    }
+}

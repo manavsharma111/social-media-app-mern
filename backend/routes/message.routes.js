@@ -2,7 +2,7 @@ import express from "express"
 import isAuth from "../middlewares/isAuth.js"
 
 import { upload } from "../middlewares/multer.js"
-import { getAllMessages, getPrevUserChats, sendMessage, editMessage, deleteMessage, deleteMessageForMe, reactToMessage, markMessagesAsRead } from "../controllers/message.controllers.js"
+import { getAllMessages, getPrevUserChats, sendMessage, editMessage, deleteMessage, deleteMessageForMe, reactToMessage, markMessagesAsRead, deleteMultipleMessages, forwardMessages } from "../controllers/message.controllers.js"
 
 
 
@@ -17,7 +17,7 @@ messageRouter.delete("/delete/:messageId",isAuth,deleteMessage)
 messageRouter.delete("/deleteForMe/:messageId",isAuth,deleteMessageForMe)
 messageRouter.post("/react/:messageId",isAuth,reactToMessage)
 messageRouter.put("/markAsRead/:senderId",isAuth,markMessagesAsRead)
-
-
+messageRouter.post("/deleteMultiple",isAuth,deleteMultipleMessages)
+messageRouter.post("/forward",isAuth,forwardMessages)
 
 export default messageRouter

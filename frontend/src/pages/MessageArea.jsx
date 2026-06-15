@@ -12,8 +12,9 @@ import axios from 'axios';
 import { serverUrl } from '../App';
 import { setMessages, markUserAsRead } from '../redux/messageSlice';
 import ReceiverMessage from '../components/ReceiverMessage';
-import { MdCall, MdVideocam } from "react-icons/md";
+import { MdCall, MdVideocam, MdDelete, MdForward } from "react-icons/md";
 import { setOutgoingCall } from '../redux/callSlice';
+import ForwardModal from '../components/ForwardModal';
 function MessageArea() {
   const {selectedUser,messages}=useSelector(state=>state.message)
     const {userData}=useSelector(state=>state.user)
@@ -28,6 +29,49 @@ const [fileType, setFileType] = useState(null)
 const [showEmojiPicker,setShowEmojiPicker]=useState(false)
 const [isOtherTyping, setIsOtherTyping] = useState(false)
 const typingTimeoutRef = useRef(null)
+
+const [isSelectionMode, setIsSelectionMode] = useState(false);
+const [selectedMessages, setSelectedMessages] = useState([]);
+const [showForwardModal, setShowForwardModal] = useState(false);
+
+const toggleSelection = (messageId) => {
+    setSelectedMessages(prev => {
+        if(prev.includes(messageId)) {
+            const newSelection = prev.filter(id => id !== messageId);
+            if(newSelection.length === 0) setIsSelectionMode(false);
+            return newSelection;
+        }
+        return [...prev, messageId];
+    });
+}
+
+const handleStartSelection = (messageId) => {
+    setIsSelectionMode(true);
+    setSelectedMessages([messageId]);
+}
+
+const handleCancelSelection = () => {
+    setIsSelectionMode(false);
+    setSelectedMessages([]);
+}
+
+const handleDeleteMultiple = async (deleteType) => {
+    try {
+        const res = await axios.post(`${serverUrl}/api/message/deleteMultiple`, { messageIds: selectedMessages, deleteType }, { withCredentials: true });
+        getAllMessages(); // Refresh messages
+        handleCancelSelection();
+    } catch (err) { console.log(err); }
+}
+
+const handleForwardMultiple = async (receiverIds) => {
+    try {
+        await axios.post(`${serverUrl}/api/message/forward`, { messageIds: selectedMessages, receiverIds }, { withCredentials: true });
+        setShowForwardModal(false);
+        handleCancelSelection();
+        // optionally refresh if we forwarded to current chat, but socket might handle it or we can just fetch
+        getAllMessages();
+    } catch (err) { console.log(err); }
+}
 
 const handleImage=(e)=>{
 const file=e.target.files[0]
@@ -195,7 +239,9 @@ useEffect(() => {
                 <span className="bg-white/50 text-[#4a5568] px-4 py-1 rounded-full text-xs font-bold shadow-[inset_2px_2px_5px_rgba(255,255,255,0.5),inset_-2px_-2px_5px_rgba(0,0,0,0.05)] border border-white/40">{date}</span>
             </div>
             {groups[date].map((mess, index) => 
-                mess.sender == userData._id ? <SenderMessage message={mess} key={mess._id || index} /> : <ReceiverMessage message={mess} key={mess._id || index} />
+                mess.sender == userData._id ? 
+                    <SenderMessage message={mess} key={mess._id || index} isSelectionMode={isSelectionMode} isSelected={selectedMessages.includes(mess._id)} toggleSelection={toggleSelection} onStartSelection={handleStartSelection} /> : 
+                    <ReceiverMessage message={mess} key={mess._id || index} isSelectionMode={isSelectionMode} isSelected={selectedMessages.includes(mess._id)} toggleSelection={toggleSelection} onStartSelection={handleStartSelection} />
             )}
         </div>
     ));
@@ -213,6 +259,25 @@ useEffect(() => {
       </div>
 
 <div className='w-full h-[80px] absolute bottom-0 flex justify-center items-center bg-white/40 backdrop-blur-md border-t border-white/50 z-[100]'>
+{isSelectionMode ? (
+  <div className='w-[90%] max-w-[800px] h-[80%] rounded-full bg-[#e0e5ec] shadow-[inset_6px_6px_12px_#a3b1c6,inset_-6px_-6px_12px_#ffffff] flex items-center justify-between px-[20px]'>
+    <div className='text-[#2d3748] font-bold'>{selectedMessages.length} Selected</div>
+    <div className='flex items-center gap-4'>
+      <div className='flex items-center justify-center w-[40px] h-[40px] rounded-full bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] hover:shadow-[inset_2px_2px_5px_#a3b1c6,inset_-2px_-2px_5px_#ffffff] cursor-pointer text-blue-500' onClick={() => setShowForwardModal(true)}>
+        <MdForward className='w-[24px] h-[24px]' />
+      </div>
+      <div className='flex items-center justify-center w-[40px] h-[40px] rounded-full bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] hover:shadow-[inset_2px_2px_5px_#a3b1c6,inset_-2px_-2px_5px_#ffffff] cursor-pointer text-red-500' onClick={() => {
+        const type = window.confirm("Delete for everyone? (OK for Everyone, Cancel for Me Only)") ? "forEveryone" : "forMe";
+        handleDeleteMultiple(type);
+      }}>
+        <MdDelete className='w-[24px] h-[24px]' />
+      </div>
+      <div className='flex items-center justify-center px-4 h-[40px] rounded-full bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] hover:shadow-[inset_2px_2px_5px_#a3b1c6,inset_-2px_-2px_5px_#ffffff] cursor-pointer text-[#4a5568] font-bold text-sm' onClick={handleCancelSelection}>
+        Cancel
+      </div>
+    </div>
+  </div>
+) : (
 <form className='w-[90%] max-w-[800px] h-[80%] rounded-full bg-[#e0e5ec] shadow-[inset_6px_6px_12px_#a3b1c6,inset_-6px_-6px_12px_#ffffff] flex items-center gap-[10px] px-[20px] relative' onSubmit={handleSendMessage}>
   {frontendFileUrl && (
     <div className='absolute top-[-120px] right-[10px] bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-2xl overflow-hidden p-[5px] flex items-center justify-center' style={{ width: '100px', height: '100px' }}>
@@ -242,7 +307,15 @@ useEffect(() => {
   {(input || frontendFileUrl) &&  <button className='w-[60px] h-[40px] rounded-full bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] active:shadow-[inset_6px_6px_12px_#a3b1c6,inset_-6px_-6px_12px_#ffffff] flex items-center justify-center cursor-pointer'><IoMdSend className='w-[25px] h-[25px] text-[#2d3748]'/></button>}
  
 </form>
+)}
 </div>
+
+{showForwardModal && (
+    <ForwardModal 
+        onClose={() => setShowForwardModal(false)}
+        onForward={handleForwardMultiple}
+    />
+)}
 
 
     </div>
