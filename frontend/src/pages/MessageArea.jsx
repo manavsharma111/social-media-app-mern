@@ -50,6 +50,11 @@ const handleStartSelection = (messageId) => {
     setSelectedMessages([messageId]);
 }
 
+const handleDirectForward = (messageId) => {
+    setSelectedMessages([messageId]);
+    setShowForwardModal(true);
+}
+
 const handleCancelSelection = () => {
     setIsSelectionMode(false);
     setSelectedMessages([]);
@@ -240,8 +245,8 @@ useEffect(() => {
             </div>
             {groups[date].map((mess, index) => 
                 mess.sender == userData._id ? 
-                    <SenderMessage message={mess} key={mess._id || index} isSelectionMode={isSelectionMode} isSelected={selectedMessages.includes(mess._id)} toggleSelection={toggleSelection} onStartSelection={handleStartSelection} /> : 
-                    <ReceiverMessage message={mess} key={mess._id || index} isSelectionMode={isSelectionMode} isSelected={selectedMessages.includes(mess._id)} toggleSelection={toggleSelection} onStartSelection={handleStartSelection} />
+                    <SenderMessage message={mess} key={mess._id || index} isSelectionMode={isSelectionMode} isSelected={selectedMessages.includes(mess._id)} toggleSelection={toggleSelection} onStartSelection={handleStartSelection} onDirectForward={handleDirectForward} /> : 
+                    <ReceiverMessage message={mess} key={mess._id || index} isSelectionMode={isSelectionMode} isSelected={selectedMessages.includes(mess._id)} toggleSelection={toggleSelection} onStartSelection={handleStartSelection} onDirectForward={handleDirectForward} />
             )}
         </div>
     ));
@@ -312,7 +317,10 @@ useEffect(() => {
 
 {showForwardModal && (
     <ForwardModal 
-        onClose={() => setShowForwardModal(false)}
+        onClose={() => { 
+            setShowForwardModal(false); 
+            if (!isSelectionMode) setSelectedMessages([]); 
+        }}
         onForward={handleForwardMultiple}
     />
 )}

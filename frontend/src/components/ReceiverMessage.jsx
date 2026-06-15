@@ -7,7 +7,7 @@ import { setMessages } from '../redux/messageSlice';
 import EmojiPicker from 'emoji-picker-react';
 import dp from "../assets/dp.webp";
 
-function ReceiverMessage({message, isSelectionMode, isSelected, toggleSelection, onStartSelection}) {
+function ReceiverMessage({message, isSelectionMode, isSelected, toggleSelection, onStartSelection, onDirectForward}) {
     const {userData}=useSelector(state=>state.user)
     const {selectedUser, messages}=useSelector(state=>state.message)
     const [showReactions, setShowReactions] = useState(false)
@@ -132,6 +132,7 @@ function ReceiverMessage({message, isSelectionMode, isSelected, toggleSelection,
           <MdOutlineMoreVert className='w-[20px] h-[20px] text-[#4a5568] cursor-pointer' onClick={(e) => { setShowMenu(!showMenu); setShowReactions(false);}} />
           {showMenu && (
             <div className='absolute bottom-full mb-2 left-0 bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-xl p-[10px] z-[50] flex flex-col gap-2 min-w-[120px]'>
+              <div className='text-[#4a5568] font-bold cursor-pointer px-[10px] py-[5px] text-[14px] whitespace-nowrap hover:bg-white/50 rounded-lg transition-colors' onClick={() => { onDirectForward(message._id); setShowMenu(false); }}>Forward</div>
               <div className='text-[#4a5568] font-bold cursor-pointer px-[10px] py-[5px] text-[14px] whitespace-nowrap hover:bg-white/50 rounded-lg transition-colors' onClick={() => { onStartSelection(message._id); setShowMenu(false); }}>Select</div>
               <div className='text-[#4a5568] font-bold cursor-pointer px-[10px] py-[5px] text-[14px] whitespace-nowrap hover:bg-white/50 rounded-lg transition-colors' onClick={handleDeleteForMe}>Delete for Me</div>
             </div>

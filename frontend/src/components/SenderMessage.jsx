@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import { MdOutlineEmojiEmotions, MdOutlineMoreVert, MdCall, MdVideocam } from "react-icons/md";
 import EmojiPicker from 'emoji-picker-react';
 
-function SenderMessage({message, isSelectionMode, isSelected, toggleSelection, onStartSelection}) {
+function SenderMessage({message, isSelectionMode, isSelected, toggleSelection, onStartSelection, onDirectForward}) {
     const {userData}=useSelector(state=>state.user)
     const {messages}=useSelector(state=>state.message)
     const [showMenu, setShowMenu] = React.useState(false)
@@ -95,6 +95,7 @@ scroll.current.scrollIntoView({behavior:"smooth"})
           {showMenu && (
             <div className='absolute bottom-full mb-2 right-0 bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-xl p-[10px] z-[50] flex flex-col gap-2 min-w-[160px] text-right'>
               <div className='text-[#4a5568] font-bold cursor-pointer px-[10px] py-[5px] text-[14px] whitespace-nowrap hover:bg-white/50 rounded-lg transition-colors' onClick={handleEdit}>Edit</div>
+              <div className='text-[#4a5568] font-bold cursor-pointer px-[10px] py-[5px] text-[14px] whitespace-nowrap hover:bg-white/50 rounded-lg transition-colors' onClick={() => { onDirectForward(message._id); setShowMenu(false); }}>Forward</div>
               <div className='text-[#4a5568] font-bold cursor-pointer px-[10px] py-[5px] text-[14px] whitespace-nowrap hover:bg-white/50 rounded-lg transition-colors' onClick={() => { onStartSelection(message._id); setShowMenu(false); }}>Select</div>
               <div className='text-[#4a5568] font-bold cursor-pointer px-[10px] py-[5px] text-[14px] whitespace-nowrap hover:bg-white/50 rounded-lg transition-colors' onClick={handleDeleteForMe}>Delete for Me</div>
               <div className='text-red-500 font-bold cursor-pointer px-[10px] py-[5px] text-[14px] whitespace-nowrap hover:bg-white/50 rounded-lg transition-colors' onClick={handleDelete}>Delete for Everyone</div>
