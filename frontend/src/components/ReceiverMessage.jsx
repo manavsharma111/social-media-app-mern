@@ -45,7 +45,7 @@ function ReceiverMessage({message}) {
         <img src={selectedUser.profileImage || dp} alt="" className='w-full h-full object-cover'/>
      </div>
 
-    <div className={`max-w-[85%] md:max-w-[70%] bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-2xl relative cursor-pointer ${(!message.message && message.image) ? 'p-[10px]' : 'px-[20px] py-[15px]'}`} onClick={() => setShowActions(!showActions)}>
+    <div className={`max-w-[85%] md:max-w-[70%] bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-2xl relative cursor-pointer ${(!message.message && message.image) ? 'p-[10px]' : 'px-[20px] py-[15px]'}`} onClick={(e) => {e.stopPropagation(); setShowActions(!showActions);}}>
         {message?.image && (
           <div className={`${message.message ? 'mb-2' : ''} flex justify-center items-center`}>
             {message?.fileType?.includes('video') ? (
@@ -97,19 +97,19 @@ function ReceiverMessage({message}) {
     
     {/* Action Menus */}
     {!message.isDeletedForEveryone && (
-      <div className={`flex items-center gap-2 ml-[10px] transition-opacity ${showActions ? 'opacity-100' : 'opacity-0 lg:group-hover:opacity-100'}`}>
+      <div className={`flex items-center gap-2 ml-[10px] transition-all duration-300 ${showActions ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none lg:pointer-events-auto lg:group-hover:opacity-100 lg:group-hover:pointer-events-auto'}`}>
         <div className='relative'>
-          <MdOutlineEmojiEmotions className='w-[20px] h-[20px] text-[#4a5568] cursor-pointer' onClick={() => {setShowReactions(!showReactions); setShowMenu(false);}} />
+          <MdOutlineEmojiEmotions className='w-[20px] h-[20px] text-[#4a5568] cursor-pointer' onClick={(e) => {e.stopPropagation(); setShowReactions(!showReactions); setShowMenu(false);}} />
           {showReactions && (
-            <div className='absolute bottom-[30px] left-0 z-[50] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-2xl'>
+            <div className='absolute bottom-[30px] left-0 z-[50] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-2xl' onClick={(e) => e.stopPropagation()}>
               <EmojiPicker onEmojiClick={handleReact} theme="light" width={300} height={350}/>
             </div>
           )}
         </div>
         <div className='relative'>
-          <MdOutlineMoreVert className='w-[20px] h-[20px] text-[#4a5568] cursor-pointer' onClick={() => {setShowMenu(!showMenu); setShowReactions(false);}} />
+          <MdOutlineMoreVert className='w-[20px] h-[20px] text-[#4a5568] cursor-pointer' onClick={(e) => {e.stopPropagation(); setShowMenu(!showMenu); setShowReactions(false);}} />
           {showMenu && (
-            <div className='absolute bottom-full mb-2 left-0 bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-xl p-[10px] z-[50] flex flex-col gap-2 min-w-[120px]'>
+            <div className='absolute bottom-full mb-2 left-0 bg-[#e0e5ec] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-xl p-[10px] z-[50] flex flex-col gap-2 min-w-[120px]' onClick={(e) => e.stopPropagation()}>
               <div className='text-[#4a5568] font-bold cursor-pointer px-[10px] py-[5px] text-[14px] whitespace-nowrap hover:bg-white/50 rounded-lg transition-colors' onClick={handleDeleteForMe}>Delete for Me</div>
             </div>
           )}
