@@ -83,8 +83,8 @@ scroll.current.scrollIntoView({behavior:"smooth"})
         <div className='relative'>
           <MdOutlineEmojiEmotions className='w-[20px] h-[20px] text-[#4a5568] cursor-pointer' onClick={(e) => { setShowReactions(!showReactions); setShowMenu(false);}} />
           {showReactions && (
-            <div className='absolute bottom-[30px] right-0 z-[50] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-2xl'>
-              <EmojiPicker onEmojiClick={handleReact} theme="light" width={240} height={350}/>
+            <div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:absolute md:top-auto md:translate-y-0 md:bottom-[30px] md:right-0 md:left-auto md:translate-x-0 z-[100] shadow-[6px_6px_12px_#a3b1c6,-6px_-6px_12px_#ffffff] rounded-2xl bg-[#e0e5ec]'>
+              <EmojiPicker onEmojiClick={handleReact} theme="light" width={280} height={350}/>
             </div>
           )}
         </div>
