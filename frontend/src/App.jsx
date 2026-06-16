@@ -26,7 +26,7 @@ import getAllNotifications from './hooks/getAllNotifications'
 import Notifications from './pages/Notifications'
 import { setNotificationData } from './redux/userSlice'
 import CallOverlay from './components/CallOverlay'
-export const serverUrl = import.meta.env.VITE_SERVER_URL || (window.location.hostname === 'localhost' ? "http://localhost:8080" : "https://social-media-app-mern-iota.vercel.app");
+export const serverUrl = import.meta.env.VITE_SERVER_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? "http://localhost:8080" : "https://social-media-app-mern-iota.vercel.app");
 function App() {
    getCurrentUser()
    getSuggestedUsers()
